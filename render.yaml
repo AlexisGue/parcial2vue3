@@ -1,0 +1,64 @@
+databases:
+  - name: parcial2vue3-db
+    plan: free
+    databaseName: parcial2vue3
+    user: parcial2vue3
+
+services:
+  - type: web
+    name: parcial2vue3-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: Clinica Parcial2
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://parcial2vue3-api.onrender.com
+      - key: APP_TIMEZONE
+        value: America/Mexico_City
+      - key: FRONTEND_URL
+        value: https://frontend-alexisgues-projects.vercel.app
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_HOST
+        fromDatabase:
+          name: parcial2vue3-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: parcial2vue3-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: parcial2vue3-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: parcial2vue3-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: parcial2vue3-db
+          property: password
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: RUN_SEED
+        value: "true"
+      - key: SEED_DEMO_USERS
+        value: "true"
+      - key: LOG_LEVEL
+        value: error
