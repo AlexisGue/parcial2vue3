@@ -27,8 +27,28 @@ run_migrations() {
       php -r '
         $schema = getenv("DB_SEARCH_PATH");
         if (!preg_match("/^[a-z_][a-z0-9_]*$/", $schema)) { fwrite(STDERR, "Invalid schema\n"); exit(1); }
-        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s;sslmode=%s", getenv("DB_HOST"), getenv("DB_PORT") ?: "5432", getenv("DB_DATABASE"), getenv("DB_SSLMODE") ?: "require");
-        $pdo = new PDO($dsn, getenv("DB_USERNAME"), getenv("DB_PASSWORD"), [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $host = getenv("DB_HOST") ?: "";
+        $port = getenv("DB_PORT") ?: "5432";
+        $db = getenv("DB_DATABASE") ?: "";
+        $user = getenv("DB_USERNAME") ?: "";
+        $pass = getenv("DB_PASSWORD") !== false ? getenv("DB_PASSWORD") : "";
+        $ssl = getenv("DB_SSLMODE") ?: "require";
+        if ($host === "") {
+          $url = getenv("DATABASE_URL") ?: getenv("DB_URL") ?: "";
+          $parts = parse_url($url);
+          if (!is_array($parts) || empty($parts["host"])) { fwrite(STDERR, "No database host\n"); exit(1); }
+          $host = $parts["host"];
+          if (!empty($parts["port"])) { $port = (string) $parts["port"]; }
+          $db = isset($parts["path"]) ? ltrim($parts["path"], "/") : "";
+          $user = isset($parts["user"]) ? rawurldecode($parts["user"]) : "";
+          $pass = isset($parts["pass"]) ? rawurldecode($parts["pass"]) : "";
+          if (!empty($parts["query"])) {
+            parse_str($parts["query"], $q);
+            if (!empty($q["sslmode"])) { $ssl = $q["sslmode"]; }
+          }
+        }
+        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s;sslmode=%s", $host, $port, $db, $ssl);
+        $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
         $pdo->exec("CREATE SCHEMA IF NOT EXISTS ".$schema);
       ' || echo "Schema not ready yet." >&2
     fi
