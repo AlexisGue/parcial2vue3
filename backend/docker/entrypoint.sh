@@ -23,6 +23,15 @@ run_migrations() {
   i=0
   echo "Waiting for database / running migrations..."
   while true; do
+    if [ -n "$DB_SEARCH_PATH" ] && [ "$DB_SEARCH_PATH" != "public" ]; then
+      php -r '
+        $schema = getenv("DB_SEARCH_PATH");
+        if (!preg_match("/^[a-z_][a-z0-9_]*$/", $schema)) { fwrite(STDERR, "Invalid schema\n"); exit(1); }
+        $dsn = sprintf("pgsql:host=%s;port=%s;dbname=%s;sslmode=%s", getenv("DB_HOST"), getenv("DB_PORT") ?: "5432", getenv("DB_DATABASE"), getenv("DB_SSLMODE") ?: "require");
+        $pdo = new PDO($dsn, getenv("DB_USERNAME"), getenv("DB_PASSWORD"), [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $pdo->exec("CREATE SCHEMA IF NOT EXISTS ".$schema);
+      ' || echo "Schema not ready yet." >&2
+    fi
     if php artisan migrate --force --no-interaction; then
       echo "Migrations OK."
       if [ "${RUN_SEED:-false}" = "true" ]; then
