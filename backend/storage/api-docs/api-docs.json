@@ -1,0 +1,267 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Parcial2Vue3 — API Gestión Médica",
+    "version": "1.0.0",
+    "description": "API RESTful Laravel + Sanctum (tokens) — Parcial II"
+  },
+  "servers": [{ "url": "/api", "description": "API base" }],
+  "components": {
+    "securitySchemes": {
+      "sanctum": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Token"
+      }
+    }
+  },
+  "paths": {
+    "/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Registro de usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password", "password_confirmation"],
+                "example": {
+                  "name": "Paciente Demo",
+                  "email": "demo.swagger@parcial.test",
+                  "password": "Password123",
+                  "password_confirmation": "Password123"
+                },
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "password_confirmation": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Usuario creado con token" } }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login paso 1 (reto 2FA)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "example": {
+                  "email": "admin@demo.test",
+                  "password": "Admin1234"
+                },
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Requiere 2FA" } }
+      }
+    },
+    "/login/verify-2fa": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login paso 2 (verificar 2FA y emitir token)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["challenge_id", "code"],
+                "example": {
+                  "challenge_id": "PEGA_AQUI_EL_challenge_id",
+                  "code": "PEGA_AQUI_EL_demo_code"
+                },
+                "properties": {
+                  "challenge_id": { "type": "string" },
+                  "code": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Token emitido" } }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Cerrar sesión",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": ["Auth"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Usuario autenticado",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/pacientes": {
+      "get": {
+        "tags": ["Pacientes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Listar pacientes",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["Pacientes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Crear paciente",
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/pacientes/{id}": {
+      "get": {
+        "tags": ["Pacientes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Ver paciente",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "put": {
+        "tags": ["Pacientes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Actualizar paciente",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "delete": {
+        "tags": ["Pacientes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Eliminar paciente",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/doctores": {
+      "get": {
+        "tags": ["Doctores"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Listar doctores",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["Doctores"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Crear doctor",
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/doctores/{id}": {
+      "get": {
+        "tags": ["Doctores"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Ver doctor",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "put": {
+        "tags": ["Doctores"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Actualizar doctor",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "delete": {
+        "tags": ["Doctores"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Eliminar doctor",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/citas": {
+      "get": {
+        "tags": ["Citas"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Listar citas",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["Citas"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Crear cita",
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/citas/{id}": {
+      "get": {
+        "tags": ["Citas"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Ver cita",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "put": {
+        "tags": ["Citas"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Actualizar cita",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "delete": {
+        "tags": ["Citas"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Eliminar cita",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/reportes/citas-por-estado": {
+      "get": {
+        "tags": ["Reportes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Citas por estado",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/reportes/citas-por-doctor": {
+      "get": {
+        "tags": ["Reportes"],
+        "security": [{ "sanctum": [] }],
+        "summary": "Citas por doctor",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/contacto": {
+      "post": {
+        "tags": ["Contacto"],
+        "summary": "Enviar mensaje de contacto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "mensaje"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "mensaje": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  }
+}

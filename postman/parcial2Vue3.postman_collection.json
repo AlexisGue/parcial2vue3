@@ -1,0 +1,170 @@
+{
+  "info": {
+    "name": "parcial2Vue3 — Gestión Médica",
+    "description": "Endpoints del Parcial II. Ejecuta Login y luego Verify 2FA: el token se guarda solo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" },
+    { "key": "challenge_id", "value": "" },
+    { "key": "demo_code", "value": "" },
+    { "key": "paciente_id", "value": "1" },
+    { "key": "doctor_id", "value": "1" },
+    { "key": "cita_id", "value": "1" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Paciente Demo\",\n  \"email\": \"demo@parcial.test\",\n  \"password\": \"Password123\",\n  \"password_confirmation\": \"Password123\"\n}" },
+            "url": "{{base_url}}/api/register"
+          }
+        },
+        {
+          "name": "Login paso 1",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.data) {", "  pm.collectionVariables.set('challenge_id', json.data.challenge_id);", "  pm.collectionVariables.set('demo_code', String(json.data.demo_code));", "}"] } }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@demo.test\",\n  \"password\": \"Admin1234\"\n}" },
+            "url": "{{base_url}}/api/login"
+          }
+        },
+        {
+          "name": "Login verify 2FA",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.data && json.data.token) pm.collectionVariables.set('token', json.data.token);"] } }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"challenge_id\": \"{{challenge_id}}\",\n  \"code\": \"{{demo_code}}\"\n}" },
+            "url": "{{base_url}}/api/login/verify-2fa"
+          }
+        },
+        {
+          "name": "Me",
+          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/me" }
+        },
+        {
+          "name": "Logout",
+          "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/logout" }
+        }
+      ]
+    },
+    {
+      "name": "Pacientes",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/pacientes" } },
+        {
+          "name": "Crear",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.data && json.data.id) pm.collectionVariables.set('paciente_id', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Ana López\",\n  \"email\": \"ana@clinica.test\",\n  \"telefono\": \"7777-0000\",\n  \"fecha_nacimiento\": \"1998-05-12\",\n  \"historial_medico\": \"Sin alergias\"\n}" },
+            "url": "{{base_url}}/api/pacientes"
+          }
+        },
+        { "name": "Ver", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/pacientes/{{paciente_id}}" } },
+        {
+          "name": "Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Ana López Actualizada\",\n  \"telefono\": \"2222-1111\"\n}" },
+            "url": "{{base_url}}/api/pacientes/{{paciente_id}}"
+          }
+        },
+        { "name": "Eliminar", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/pacientes/{{paciente_id}}" } }
+      ]
+    },
+    {
+      "name": "Doctores",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/doctores" } },
+        {
+          "name": "Crear",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.data && json.data.id) pm.collectionVariables.set('doctor_id', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Dr. Carlos Ruiz\",\n  \"email\": \"carlos.ruiz@clinica.test\",\n  \"especialidad\": \"Medicina general\",\n  \"cualificaciones\": \"Médico general\",\n  \"password\": \"Doctor1234\"\n}" },
+            "url": "{{base_url}}/api/doctores"
+          }
+        },
+        { "name": "Ver", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/doctores/{{doctor_id}}" } },
+        {
+          "name": "Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"especialidad\": \"Pediatría\"\n}" },
+            "url": "{{base_url}}/api/doctores/{{doctor_id}}"
+          }
+        },
+        { "name": "Eliminar", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/doctores/{{doctor_id}}" } }
+      ]
+    },
+    {
+      "name": "Citas",
+      "item": [
+        { "name": "Listar", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/citas" } },
+        {
+          "name": "Crear",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.data && json.data.id) pm.collectionVariables.set('cita_id', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"paciente_id\": {{paciente_id}},\n  \"doctor_id\": {{doctor_id}},\n  \"fecha_cita\": \"2026-10-01T10:00:00\",\n  \"notas\": \"Consulta general\"\n}" },
+            "url": "{{base_url}}/api/citas"
+          }
+        },
+        { "name": "Ver", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/citas/{{cita_id}}" } },
+        {
+          "name": "Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"confirmed\"\n}" },
+            "url": "{{base_url}}/api/citas/{{cita_id}}"
+          }
+        },
+        { "name": "Eliminar", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/citas/{{cita_id}}" } }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        { "name": "Citas por estado", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/reportes/citas-por-estado" } },
+        { "name": "Citas por doctor", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{base_url}}/api/reportes/citas-por-doctor" } }
+      ]
+    },
+    {
+      "name": "Contacto",
+      "item": [
+        {
+          "name": "Enviar mensaje",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"paciente@correo.test\",\n  \"mensaje\": \"Quiero agendar una cita\"\n}" },
+            "url": "{{base_url}}/api/contacto"
+          }
+        }
+      ]
+    }
+  ]
+}
